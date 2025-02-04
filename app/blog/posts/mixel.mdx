@@ -1,0 +1,149 @@
+---
+title: "Mixel: Building a Color Mixing Game"
+publishedAt: "2024-11-01"
+summary: "Explore the enduring debate between using spaces and tabs for code indentation, and why this choice matters more than you might think."
+image: "/media/mixel/gameplay.png"
+project: true
+---
+
+My goal has always been to develop and publish an app on the iOS App Store. This project aims to create a small, enjoyable, and elegant game that can be deployed on both iOS and the web.
+
+## Building a Unity Prototype
+
+The initial inspiration for the game was to build a new version of chess that utilized
+mixing colors instead of chess pieces. This app would need single player and multiplayer mode to accomplish the original goal.
+
+I built the prototype using Unity as it is relatively simple and it is good for trying new ideas.
+Here is a video of the initial prototyping titled 'pixel prism' to develop the base of the game's mechanics:
+
+<video controls width="600">
+  <source src="/media/mixel/pixel_prism.mov" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+The goal color is the background color and the object of the game is to move / mix colors to get as close as possible to the goal color (increasing the similarity percentage). The player's starting square has a blue dot on it and in the final game this indicator should remain on top of the current square. If a player moves their square, it moves as far as possible until it meets with the next available square.
+
+<a href="https://github.com/AntonioMolteni/Pixel-Prism-Project" target="_blank">
+  Unity Version
+</a>
+
+## Implementing Multiplayer and Improving the UI
+
+After completing the unity prototype, I decided to start developing a web version of the game. I chose to use ReactJS for the frontend and and NodeJS for the backend server / api. Fortunately for us, a multiplayer game framework for NodeJS has already been created called ColyseusJS. We will use this framework for our multiplayer rooms and room data structures / schema.
+
+#### Single Player
+
+<video controls width="600">
+  <source src="/media/mixel/palette_single_player.mov" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+#### Multiplayer
+
+<video controls width="600">
+  <source src="/media/mixel/palette_multi_player.mov" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+Here are the data structures I used for the Roomstate for compatibility with Colyseus.js.
+
+```ts
+import { Schema, MapSchema, ArraySchema, type } from "@colyseus/schema";
+
+export class Player extends Schema {
+  @type("number") playerRow: number;
+  @type("number") playerCol: number;
+  @type("string") playerColor = "#ffffff";
+  @type("number") playerPercentage = 0;
+  @type("number") playerCurrentScore = 0;
+  @type("number") playerTotalScore = 0;
+  @type("string") playerUsername = "";
+  @type("boolean") locked: boolean;
+}
+
+export class Square extends Schema {
+  @type("number") row: number;
+  @type("number") col: number;
+  @type("string") color: string;
+  @type("boolean") deleted: boolean;
+  @type("boolean") occupied: boolean;
+}
+
+export class MyRoomState extends Schema {
+  @type({ map: Player }) players = new MapSchema<Player>();
+  @type("string") currentPlayerSessionId: string;
+  @type("string") currentPlayerUsername: string;
+  @type([Square]) grid = new ArraySchema<Square>();
+  @type("int32") numRows: number;
+  @type("int32") numColumns: number;
+  @type("string") goalColor: string;
+}
+```
+
+After completing this version of the game, I shared it with my friends and family for feedback. Most people were very confused about how to play and most people were not interested in the multiplayer game mode. This feedback prompted me to begin the creation of a tutorial and stop development on the multiplayer mode.
+
+I also had some feedback on the scoring algorithms that compare the goal color and the player's current color. Colors that appear to be the same were not similar enough according to the algorithm. I upgraded this code to use the CIE94 color comparison metric which you can read more about <a href="https://en.wikipedia.org/wiki/Color_difference#CIE94" target="_blank">here</a>. This new algorithm still had the same problem (albeit to a lesser extent). I am currently working on a new algorithm to solve this problem but it requires a lot of calibration to do so. Below is the CIE94 Algorithm implemented:
+
+```js
+// Must return a number between 0 and 100
+export function calculateColorSimilarity(playerColor, goalColor) {
+  const difference = calculateCIE94Difference(goalColor, playerColor);
+  const percentage = Math.max(0, 100 - difference); // Invert the metric
+  return parseFloat(percentage.toFixed(0));
+}
+
+export function calculateCIE94Difference(color1, color2) {
+  const rgb1 = hexToRgb(color1);
+  const rgb2 = hexToRgb(color2);
+
+  const lab1 = rgbToLab(rgb1.r, rgb1.g, rgb1.b);
+  const lab2 = rgbToLab(rgb2.r, rgb2.g, rgb2.b);
+
+  const deltaL = lab1.L - lab2.L;
+  const L = (lab1.L + lab2.L) / 2;
+  const C1 = Math.sqrt(lab1.a * lab1.a + lab1.b * lab1.b);
+  const C2 = Math.sqrt(lab2.a * lab2.a + lab2.b * lab2.b);
+  const deltaC = C1 - C2;
+  const deltaA = lab1.a - lab2.a;
+  const deltaB = lab1.b - lab2.b;
+  const deltaH = Math.sqrt(deltaA * deltaA + deltaB * deltaB - deltaC * deltaC);
+
+  const kL = 1.0;
+  const kC = 1.0;
+  const kH = 1.0;
+  const K1 = 0.045;
+  const K2 = 0.015;
+
+  const sL = 1.0;
+  const sC = 1.0 + K1 * C1;
+  const sH = 1.0 + K2 * C1;
+
+  const deltaE94 = Math.sqrt(
+    (deltaL / (kL * sL)) * (deltaL / (kL * sL)) +
+      (deltaC / (kC * sC)) * (deltaC / (kC * sC)) +
+      (deltaH / (kH * sH)) * (deltaH / (kH * sH))
+  );
+  return deltaE94;
+}
+```
+
+Given that I was no longer pursuing multiplayer functionality. I decided to deprecate this version of the code and move to a React Native framework for easier deployment to Android and iOS. Here is the deprecated version:
+
+<a href="https://github.com/AntonioMolteni/PaletteMatchReact" target="_blank">
+  ReactJS and ColyseusJS Version
+</a>
+
+## React Native Consolidation
+
+In the past, I have built iOS apps using Swift / xCode. For this application I wanted both a web and an iOS / iPad application. The frontend of the game was already written in ReactJS making conversion to React Native teh obvious choice. This migration would allow consolidation of the iOS and web version into a single codebase for ease of future maintainability.
+
+Some notable additions to this new code base are an improved UI, a tutorial, and a new game mode to replace multiplayer called Daily Challenge. The Daily Challenge provides uses a date-based algorithm to create a derived grid. This means that all players have the same color grid daily. The goal is to match the goal color perfectly to achieve 100% similarity. This is always possible as I implemented a new deterministic algorithm to choose the goal color based off of the existing grid so that it is always possible to achieve a perfect score (demonstrated in the following video).
+
+<video controls width="600">
+  <source src="/media/mixel/mixel.mov" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
+
+This is the current version of the game that has been published at <a href="https://playmixel.com" target="_blank">playmixel.com</a> and on the <a href="https://apps.apple.com/us/app/play-mixel/id6737012541" target="_blank">Apple App Store</a>
+
+If you have any bugs, suggestions, or want to contribute, please let me know at <a href="mailto:support@playmixel.com">support@playmixel.com</a>.
