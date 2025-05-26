@@ -6,11 +6,216 @@ image: "/media/calttc/calttc_home.png"
 project: true
 ---
 
-I played table tennis in high school and when I came to college I wanted to continue playing. Doing a quick google search for table tennis clubs on campus. I was unable to see any of the pertinent information like the playing schedule or how to join as all of the information was outdated and the website was very slow. The purpose of this project is to fix this problem.
+I have always been passionate about table tennis, having played throughout high school. Upon arriving at college, I was eager to continue playing and quickly discovered the Cal Table Tennis Club through a Google search. However, I found the club's website to be outdated, slow to load, and lacking essential information such as the playing schedule and membership details. This project aims to revamp the website, giving it a modern look and making it easier to update with the latest information.
 
-Before starting this project, I knew very little about web development and I made it a challenge to create a solid website using simply html and css as an exercise. This website outperformed the previous sites load times and was much better. Looking back I made some pretty obvious mistakes but I learned a lot: Here is a video of that site:
+[CalTTC Current Website](https://calttc.studentorg.berkeley.edu/22)
+
+## Starting with a Static Site
+
+Before starting this project, I had limited knowledge of web development. To build a strong foundation, I created a basic website using only HTML and CSS. This initial version significantly improved the load times compared to the previous site. I utilized Bootstrap CSS and some pre-built JavaScript components to enhance the design and functionality. Here is a video showcasing that version of the website:
 
 <video controls width="600">
   <source src="/media/calttc/static_site.mov" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
+
+While I was creating the static site, I wanted to add a sign-up page for training sessions that the club was holding. Upon some further research I realized that I needed to use a web framework to accomplish this properly. I ended up doing some research and I decided to use a web framework called django.
+
+## Upgrading to a Django Web Framework
+
+I chose the Django framework because it had a lot of built-in functionality for statically rendered sites. It comes with a built-in admin UI and for managing database tables and dynamic content. I found Django super intuitive and the amount of resources and approachability created an environment that promoted you to follow Django / Pythonic best-practices.
+
+Since I knew I was building a sign-up system. I knew that I needed a player database. I accomplished this by creating a user model in django and implementing the Google Oauth web-app authentication using django all-auth. When a user signs in with their gmail account, the data goes straight to a django database table. I also created a session model that forms a many to many relationship with users using. As I created the basic functionality, I kept coming up with more features and information that would be useful for training sessions. Here is a demonstration of the final feature set:
+
+## Setting up the Data Structures
+
+If you follow Django templates and best practices, the data structure objects that you make will automatically be populated in the django admin route. This is great for ensuring that all of your data structures for storing dynamic website content. The first database I set up was a user database to allow for different types of users and statuses such as administration, staff, and regular users. Updating your python models allowed database migrations to be done very easily by running `python manage.py makemigrations` and `python manage.py migrate`. This makes managing api calls for mant common database relationships extremely easy because you can use django syntax to make different relationships like many to many.
+
+I used these relationships in different datastructure objects. For example, I wanted to make a training session form on my website so that users can sign up for training sessions with their friends. Before I can create the form, I need to create a datastructure that can store a list of users and point to their user object in the database. Django makes this as simple as adding a single line of code to create a many to many relationship.
+
+```python
+class Session(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    session_type = models.CharField(
+        max_length=30, choices=SessionTypeChoices, default=""
+    )
+    location = models.CharField(
+        max_length=30, choices=LocationChoices, default="RSF Field House"
+    )
+    time = models.DateTimeField()
+    duration = models.PositiveIntegerField()
+    capacity = models.IntegerField()
+    note = models.CharField(max_length=300, default=None, blank=True, null=True)
+    is_closed = models.BooleanField(default=False)
+    is_cancelled = models.BooleanField(default=False)
+    coaches = models.ManyToManyField(
+        User, related_name="coaching", limit_choices_to={"is_staff": True}
+    )
+    players = models.ManyToManyField(User, related_name="playing", blank=True)
+    queue = models.ManyToManyField(User, related_name="queuing", blank=True)
+    requires_membership = models.BooleanField(default=False)
+```
+
+## Creating Forms
+
+After a data structure is complete, we can create a view in a python file like the one below to process form data.
+
+`sessions/views.py`
+
+```python
+@login_required
+@staff_member_required
+def add_sessions(request):
+    if request.method == "POST":
+        form = AddSessionsForm(request.POST)
+
+        if form.is_valid():
+            total_duration = form.cleaned_data["total_duration"]
+            num_sessions = form.cleaned_data["num_sessions"]
+            start_time = form.cleaned_data["start_time"]
+
+            duration_per_session = total_duration // num_sessions
+            session_time = start_time
+
+            sessions = []
+
+            for _ in range(num_sessions):
+                session = Session(
+                    session_type=form.cleaned_data["session_type"],
+                    location=form.cleaned_data["location"],
+                    time=session_time,
+                    duration=duration_per_session,
+                    capacity=form.cleaned_data["capacity"],
+                    note=form.cleaned_data["note"],
+                )
+                session.save()
+                session.coaches.set(form.cleaned_data["coaches"])
+                sessions.append(session)
+
+                session_time += timedelta(minutes=duration_per_session)
+
+            return redirect(reverse("sessions") + "#" + sessions[0].get_id())
+    else:
+        form = AddSessionsForm()
+
+    return render(request, "sessions/add_sessions.html", {"form": form})
+
+```
+
+`sessions/forms.py`
+
+```python
+class AddSessionsForm(ModelForm):
+  total_duration = forms.IntegerField(label='Total duration (in minutes)')
+  num_sessions = forms.IntegerField(label='Number of sessions')
+  start_time = forms.SplitDateTimeField(label='Start time',
+    initial=datetime.now().replace(microsecond=0, second=0, minute=0)
+    )
+
+  class Meta:
+    model = Session
+    exclude = ['is_cancelled','is_closed','players','queue','duration','time',]
+
+    widgets = {
+      'session_type':forms.Select(attrs={'class':'form-control'}),
+      'location':forms.Select(attrs={'class':'form-control'}),
+      'capacity':forms.TextInput(attrs={'class':'form-control','type':'tel'}),
+      'coaches':forms.CheckboxSelectMultiple(attrs={'class':'checkbox-control'}),
+      'note':forms.Textarea(attrs={'class':'form-control'}),
+    }
+
+  def __init__(self, *args, **kwargs):
+      super(AddSessionsForm, self).__init__(*args, **kwargs)
+      self.fields['total_duration'].widget = forms.TextInput(attrs={'class':'form-control','type':'tel'})
+      self.fields['num_sessions'].widget = forms.TextInput(attrs={'class':'form-control','type':'tel'})
+      self.fields['start_time'].widget = forms.SplitDateTimeWidget(
+        date_attrs={'type': 'date','class': 'form-control'},
+        time_attrs={'type': 'time','class': 'form-control'})
+
+  def clean(self):
+      cleaned_data = super().clean()
+      total_duration = cleaned_data.get('total_duration')
+      num_sessions = cleaned_data.get('num_sessions')
+
+      if total_duration and num_sessions:
+          if total_duration % num_sessions != 0:
+              self.add_error('total_duration', 'Total duration should be divisible by the number of sessions.')
+```
+
+`templates/add_sessions.html`
+
+```html
+{% extends 'base.html' %} {% block content %}{% load static %}
+
+<div class="container-fluid padding">
+  <div class="row">
+    <div class="col-12">
+      <h1><b>Add Sessions</b></h1>
+      <form action="" method="POST">
+        {% csrf_token %}
+        <b>{{ form.session_type.label }}:</b>
+        {{ form.session_type }}
+        <b style="color:#FF0000">{{ form.session_type.errors }}</b>
+
+        <b>{{ form.location.label }}:</b>
+        {{ form.location }}
+        <b style="color:#FF0000">{{ form.location.errors }}</b>
+
+        <b>{{ form.start_time.label }}:</b>
+        {{ form.start_time }}
+        <b style="color:#FF0000">{{ form.start_time.errors }}</b>
+
+        <b>{{ form.total_duration.label }}:</b>
+        {{ form.total_duration }}
+        <b style="color:#FF0000">{{ form.total_duration.errors }}</b>
+
+        <b>{{ form.num_sessions.label }}:</b>
+        {{ form.num_sessions }}
+        <b style="color:#FF0000">{{ form.num_sessions.errors }}</b>
+
+        <b>{{ form.capacity.label }}:</b>
+        {{ form.capacity }}
+        <b style="color:#FF0000">{{ form.capacity.errors }}</b>
+
+        <b>{{ form.coaches.label }}:</b>
+        {{ form.coaches }}
+        <b style="color:#FF0000">{{ form.coaches.errors }}</b>
+
+        <b>{{ form.note.label }}:</b>
+        {{ form.note }}
+        <b style="color:#FF0000">{{ form.note.errors }}</b>
+        <br />
+
+        <input
+          type="submit"
+          value="Add Sessions"
+          class="btn btn-outline-success btn-lg"
+        />
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
+```
+
+The above code allows you to separate concerns and have a very high level of control over the actual html that is displayed on the webpage.
+With a little bit of styling we can achieve a complete form:
+
+![Add Sessions](/media/calttc/add_sessions.png)
+
+Similarly we can create another view and html template to create a way to view all the sessions:
+![Sessions](/media/calttc/sessions.png)
+
+## Updating the Graphics
+
+One of the secondary goals of this project was to revamp the club's graphics to be a higher resolution. Most of the graphics before were low resolution raster images which looked very 1990s. To solve this issue I learned how to use an open source program called [Inkscape](https://inkscape.org/) to convert the legacy club logos and graphics to vector images (svgs).
+
+Here is the [Graphics Page](https://calttc.studentorg.berkeley.edu/graphics/) on the site.
+
+## Other features
+
+![Graphics](/media/calttc/calttc_graphics.png)
+There are a bunch more forms and administration features that I implemented including updating carousel photos! Feel free to check out the source code:
+
+[CalTTC Django Source](https://github.com/AntonioMolteni/calttc_django)

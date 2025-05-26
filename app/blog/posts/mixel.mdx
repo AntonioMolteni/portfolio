@@ -23,9 +23,7 @@ Here is a video of the initial prototyping titled 'pixel prism' to develop the b
 
 The goal color is the background color and the object of the game is to move / mix colors to get as close as possible to the goal color (increasing the similarity percentage). The player's starting square has a blue dot on it and in the final game this indicator should remain on top of the current square. If a player moves their square, it moves as far as possible until it meets with the next available square.
 
-<a href="https://github.com/AntonioMolteni/Pixel-Prism-Project" target="_blank">
-  Unity Version
-</a>
+[Unity Version](https://github.com/AntonioMolteni/Pixel-Prism-Project)
 
 ## Implementing Multiplayer and Improving the UI
 
@@ -82,7 +80,7 @@ export class MyRoomState extends Schema {
 
 After completing this version of the game, I shared it with my friends and family for feedback. Most people were very confused about how to play and most people were not interested in the multiplayer game mode. This feedback prompted me to begin the creation of a tutorial and stop development on the multiplayer mode.
 
-I also had some feedback on the scoring algorithms that compare the goal color and the player's current color. Colors that appear to be the same were not similar enough according to the algorithm. I upgraded this code to use the CIE94 color comparison metric which you can read more about <a href="https://en.wikipedia.org/wiki/Color_difference#CIE94" target="_blank">here</a>. This new algorithm still had the same problem (albeit to a lesser extent). I am currently working on a new algorithm to solve this problem but it requires a lot of calibration to do so. Below is the CIE94 Algorithm implemented:
+I also had some feedback on the scoring algorithms that compare the goal color and the player's current color. Colors that appear to be the same were not similar enough according to the algorithm. I upgraded this code to use the CIE94 color comparison metric which you can read more about [here](https://en.wikipedia.org/wiki/Color_difference#CIE94). This new algorithm still had the same problem (albeit to a lesser extent). I am currently working on a new algorithm to solve this problem but it requires a lot of calibration to do so. Below is the CIE94 Algorithm implemented:
 
 ```js
 // Must return a number between 0 and 100
@@ -129,9 +127,7 @@ export function calculateCIE94Difference(color1, color2) {
 
 Given that I was no longer pursuing multiplayer functionality. I decided to deprecate this version of the code and move to a React Native framework for easier deployment to Android and iOS. Here is the deprecated version:
 
-<a href="https://github.com/AntonioMolteni/PaletteMatchReact" target="_blank">
-  ReactJS and ColyseusJS Version
-</a>
+[ReactJS and ColyseusJS Version](https://github.com/AntonioMolteni/PaletteMatchReact)
 
 ## React Native Consolidation
 
@@ -144,6 +140,6 @@ Some notable additions to this new code base are an improved UI, a tutorial, and
   Your browser does not support the video tag.
 </video>
 
-This is the current version of the game that has been published at <a href="https://playmixel.com" target="_blank">playmixel.com</a> and on the <a href="https://apps.apple.com/us/app/play-mixel/id6737012541" target="_blank">Apple App Store</a>
+This is the current version of the game that has been published at [playmixel.com](https://playmixel.com) and on the [Apple App Store](https://apps.apple.com/us/app/play-mixel/id6737012541)
 
-If you have any bugs, suggestions, or want to contribute, please let me know at <a href="mailto:support@playmixel.com">support@playmixel.com</a>.
+If you have any bugs, suggestions, or want to contribute, please let me know at [support@playmixel.com](mailto:support@playmixel.com).

@@ -1,33 +1,155 @@
 ---
-title: "ebike: How to Bafang!"
+title: "How to Bafang!: Building a Reliable E-Bike"
 publishedAt: "2024-04-07"
 summary: "How I converted my fixed frame commuter bike into an e-bike with custom lighting."
 image: "/media/ebike/ebike_lights.png"
-project: false
+project: true
 ---
 
-The debate between using spaces and tabs for indentation in coding may seem trivial to the uninitiated, but it is a topic that continues to inspire passionate discussions among developers. This seemingly minor choice can affect code readability, maintenance, and even team dynamics.
+## Introduction
 
-Let's delve into the arguments for both sides and consider why this debate remains relevant in the software development world.
+I love bikes. During college, I decided to go car-free and rely on biking and public transit. Initially, this worked well—I had a rack, folding panniers for groceries, and my apartment was close to both campus and essential stores. My daily commute involved pedaling uphill to school and enjoying the ride downhill on the way home.
 
-## The Case for Spaces
+However, everything changed in my third year; I moved farther from campus, significantly increasing my commute. The nearest grocery store was also much farther, making daily cycling less practical. The long, sweaty rides discouraged me from going places, so I decided to take on an engineering project: building an electric bike.
 
-Advocates for using spaces argue that it ensures consistent code appearance across different editors, tools, and platforms. Because a space is a universally recognized character with a consistent width, code indented with spaces will look the same no matter where it's viewed. This consistency is crucial for maintaining readability and avoiding formatting issues when code is shared between team members or published online.
+## Choosing the Components
 
-Additionally, some programming languages and style guides explicitly recommend spaces for indentation, suggesting a certain number of spaces (often two or four) per indentation level. Adhering to these recommendations can be essential for projects that aim for best practices in code quality and readability.
+I chose the Bafang BBS02 mid-drive motor. It offered solid power, used standard electrical connectors, and was easier to program than many alternatives. Additionally, since the BBS02 replaces your pedal assembly on the bottom bracket, it integrates well with most standard bike frames. Most importantly, it is plug and play; you are buying a complete system that in theory does not require any additional soldering. But if you are like me and want everything to be exactly the way you want it, this system is very easy to customize to your specific use case.
 
-## The Case for Tabs
+I started out with a kit like this one on amazon:
+[BAFANG 750W Mid Drive Kit](https://www.amazon.com/BAFANG-Conversion-Chainring-Display-Battery/dp/B0BXDS3J56/ref=dp_prsubs_d_sccl_1/142-0247899-0502064?pd_rd_w=CYrdz&content-id=amzn1.sym.00d8f370-c2ec-4432-aa57-10d669af24cb&pf_rd_p=00d8f370-c2ec-4432-aa57-10d669af24cb&pf_rd_r=GHN43HKZDCZDT7B93CZT&pd_rd_wg=UHYmo&pd_rd_r=034168e0-f470-461d-a74e-e82cad8aeeea&pd_rd_i=B0BXDS3J56&psc=1)
 
-On the other side of the debate, proponents of tabs highlight the flexibility that tabs offer. Because the width of a tab can be adjusted in most text editors, individual developers can choose how much indentation they prefer to see, making the code more accessible and comfortable to read on a personal level. This adaptability can be particularly beneficial in teams with diverse preferences regarding code layout.
+There are a variety of options to choose from and your choice will vary based on your preferences. On amazon you will customize your order by a few things:
 
-Tabs also have the advantage of semantic meaning. A tab is explicitly meant to represent indentation, whereas a space is used for many purposes within code. This distinction can make automated parsing and manipulation of code simpler, as tools can more easily recognize and adjust indentation levels without confusing them with spaces used for alignment.
+- Battery Size and Style
+- Sprocket Size (36 Tooth 42T, 44T, 52T)
+- Bottom Bracket Spacer
+- Display
+- Brake Lever or Brake Sensor
+- Shift Sensor or Gear Sensor
 
-## Hybrid Approaches and Team Dynamics
+Note you probably don't need the shift/gear sensor.
 
-The debate often extends into discussions about hybrid approaches, where teams might use tabs for indentation and spaces for alignment within lines, attempting to combine the best of both worlds. However, such strategies require clear team agreements and disciplined adherence to coding standards to prevent formatting chaos.
+Here is a full step-by-step [Installation Guide](https://www.youtube.com/watch?v=Embjdj5ezfc) to get you started if you are new to this hobby.
+For my full list of recommended parts see the [Purchase List](#purchase-list).
 
-Ultimately, the choice between spaces and tabs often comes down to team consensus and project guidelines. In environments where collaboration and code sharing are common, agreeing on a standard that everyone follows is more important than the individual preferences of spaces versus tabs. Modern development tools and linters can help enforce these standards, making the choice less about technical limitations and more about team dynamics and coding philosophy.
+## Motor-Controller
+
+To install the motor, I removed the existing bottom bracket and cranks using a bottom bracket removal tool for my cranks. I then mounted the Bafang BBS02 unit. Because the controller is part of this unit, there is no need to mount an additional controller like other e-bike kits.
+
+![Bottom Bracket](/media/ebike/bottom_bracket.png)
+
+I also recommend purchasing a stabilizer bar separately like this one. I used my e-bike for a while without one; the bar helps secure the motor to the frame, preventing it from twisting in the bottom bracket during hard acceleration.
+
+![Bottom Bracket](/media/ebike/stabilizer-bar.png)
+
+### Battery
+
+I initially purchased a 52V battery with 20AH Capacity, but in hindsight, I overbought. While the extra power is useful for long rides, the added weight can be cumbersome.
+
+For most users, I suggest:
+
+- 48V rear rack battery for a balance of power and convenience
+- 52V battery only if you need extra range and performance
+
+### Display
+
+I recommend the DM03 display, which is:
+
+- Small and compact
+- Backlit for night riding
+- Displays essential information (speed and power settings)
+
+I initially mounted the battery on the downtube using the built-in bottle cage mounts, as most guides recommend. While I found this setup somewhat clunky and explored alternative solutions, it's likely the most practical option for most users. Later in this article I will discuss why I chose to put the battery in my backpack and use a tether instead.
+
+Note: This display has been discontinued. The main point is that you don't need a big display with lots of features. The primary purpose of the display is to show your speed and turn on the controller.
+
+### Chainring Choice
+
+I chose a 36T chainring, which closely matched the middle sprocket of my original setup. For most riders, I recommend pairing:
+
+- 36T chainring with a 48V battery for a balanced experiences
+
+Mounting the battery in a backpack or on the bike rack.
+
+I decided to carry the battery in my backpack, which offered several benefits:
+
+- Easier portability
+- Theft deterrence (the bike can’t be powered on without the battery)
+- Improved balance — frame-mounted batteries can affect steering geometry and reduce stability depending on their location
+
+## Wiring
+
+Refer to the wiring diagram below to connect all the components—it's straightforward and difficult to get wrong. I used this configuration for an extended period, and it performed reliably.
+![Bafang Wiring Guide](/media/ebike/bafang_wiring_guide.png)
+Note: The bike will not operate correctly without the speed sensor installed and the display connected. You won't be able to start the bike without the display connected because the power button is on the display and the throttle curves and the motor controller rely on the wheel speed sensor for feedback.
+
+## Headlight and Taillight
+
+The stock headlight was functional but not bright enough for daily commuting. I upgraded to a more powerful light and added a taillight for visibility.
+
+I purchased a pre-packaged lighting kit that included an adapter to connect directly to the bike’s primary battery. However, the default controls were too sensitive as I frequently honked the horn by accident. To fix this issue I rewired the headlight system to use different buttons. The most important part of a kit like this is the splice into the main power so that you can run a more powerful light and tailight. Here is the one I purchased and modified
+![All In One Lighting Kit](/media/ebike/all_in_one_lighting_kit.png)
+
+I didn't like the controls on this kit so I soldered a new switch module to make the kit have the same components as this kit that does not come with the splicing adapter.
+![Lighting Components](/media/ebike/lighting_components.png)
+
+## Lighting for Wheels and Frame
+
+While front and rear lighting improved visibility, I also wanted to be seen from the sides. I installed:
+
+- Wheel lights from Amazon
+- Fairy lights wired into the headlight circuit
+
+These additions made nighttime rides safer and enhanced the bike’s aesthetics.
+
+## 3D Printed Parts
+
+Some components of my build broke over time, including the headlight housing. After replacing it twice with cheap alternatives from AliExpress, I decided to 3D print my own.
+
+Additionally, I designed and printed:
+
+- A mount for the XT60 connector, allowing quick battery connection from the backpack
+- A taillight mount for better stability
+
+## Programming the Throttle Curve
+
+To fine-tune the bike’s throttle response, I used programming software and adjusted the settings accordingly. This customization allowed smoother acceleration and better control.
+
+## Purchase List
+
+### Essential Components
+
+- [Bafang Mid-Drive Motor-Controller (I purchased BBS02)](https://www.amazon.com/BAFANG-BBS02B-Display-Electric-Conversion/dp/B07KYMSTMD/ref=sr_1_4?crid=PSNI00QDLB15&dib=eyJ2IjoiMSJ9.NbTlz-fTeX7TEYTvm2GqTi1udPhkjPlNcsFG_L8z0DQm8FqCg0IIZcFzrmLN2TOhYKFhpzZoYlmUHK1HONCHqKFlJ_nkPEqQSBL331fIVOoZ2vmj5I89t3V_XcGNmDvYtnXpBcNjLr7myUwvSXDKQOhhmtXaRkiA3tElT3QZxvPJ9pvQia1pCWwJce2xjJylr8uZTDwUVdYTgVrODOcA3rzi4CR3fmbMqQXel_ZRsUI.PU5SIJ32W-8W8Bw6SFONY5HR8j1tlWgzbXcCn7_Pa1g&dib_tag=se&keywords=BBS02&qid=1748285638&sprefix=bbs02%2Caps%2C228&sr=8-4)
+- [48V or 52V Battery (I purchased the 52V20AH Downtube battery)](https://www.amazon.com/DICHOU-Ebike-Battery-Power-Runner/dp/B0CQXMH83G/ref=sr_1_14_sspa?crid=2EAEPBE6MYON5&dib=eyJ2IjoiMSJ9.PEuANx_BxMuAzhMABhvQaVvqvdvjLWEX9dF-Zq-famdV-L3Iw49Oq1G86XrLA9kt-2_g8HpqV4HSMjDLAtyovUWKRClEVxM4UHsKopwMbZ2OjWtBkR-SzJDgkBsjKOB-4Sag-BGOe4hi6XGCcysDdOHRdFzeNEZHa9EXXR_KnWp0Gf7MvHXUMo0_1CxI0_IE628HzlTmhvGRK9SH280kJGsnCnG0ckkk-25S-3svfb8.3yJ3ox0qOWuUgUlWsWgm6Q7BlmkvmRPvK4_-b7h0Rpk&dib_tag=se&keywords=BAFANG%2B52%2BV%2B19AH%2BBATTERY&qid=1748285586&sprefix=bafang%2B52%2Bv%2B1ah%2Bbattery%2Caps%2C245&sr=8-14-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9tdGY&th=1)
+
+### Upgrades for Backpack Battery
+
+- [XT60 extension cable (3ft or 5ft) ](https://www.amazon.com/Extension-Connector-Portable-Station-Battery/dp/B0DSTQJM4M/ref=sr_1_2_sspa?dib=eyJ2IjoiMSJ9.KVlfOMqtyySIuCyuzFZHeyR6SSuw2tc9HMLSZO4kWPKzn2bKuA4_PLgvZUzo_aSbbLG_5v5w1EQPqgISsr4Da_aZZ7mu0hqQxca-Cz3DhmwAN6rU6k3HxAwPm_wo3ndiAnGz9KyIeN1BRJNuur1qdqfOUKJA8skuUHKLTNetdbuqOBsVwNoVJmB7sxfoE70Si9IMxfJXIhr3EHkkHdIDETH9hvqjSgl3QifZtLFhhhs.7L3_rLAUU3XVJs8RfJfndrfBVNSaUzcQcNwK0vdKLXY&dib_tag=se&keywords=xt60%2Bextension%2Bcable&qid=1748285422&sr=8-2-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9hdGY&th=1)
+
+- [XT60 patch connector](https://www.amazon.com/XT60EW-M-Mountable-Connector-Aircraft-Racing/dp/B0BC5T7CHW/ref=sr_1_7?crid=NMKDJXK7R0YE&dib=eyJ2IjoiMSJ9.9jlezUnkoyH5jGqR1pEzeRMBVY8oJZPAM6QarI0wo7jjYeEPbYrJtj9vnTN98CElB85_NAo5kvtrx9RQzFl_OH3xWr7kiUaMNGZAXJRN83B7HBDcTXUeOaD7laAZqA5DyOpulLX-HQA3OhsmvYXzNr2_0LmJjvNB6IF1pxYymkr5ApGllMVIMj51NRePOEY1yOCXPpuGuvQzAFbO66AwUzF8XztbeWDYzGYk2XFd9ZaagnTdRY8altIpTXWjInD8dbYzSoptTHRzZXcEjR3-jbdXBj7WgSC0JQXjvCpUouw.egZmuvsbzhVIM8ssKUN8JC4-pd672H6DBVU7Qg3Y2pY&dib_tag=se&keywords=xt60%2Bpatch%2Bconnector%2Bblack%2Bmount&qid=1748285490&sprefix=xt60%2Bpatch%2Bconnector%2Bblack%2Bmou%2Caps%2C155&sr=8-7&th=1)
+
+### Mounting Upgrades
+
+- [Stabilizer Bar](https://california-ebike.com/products/california-ebike-stabilizer-bar-for-bbs02-or-bbshd)
+- Upgraded headlight and taillight
+- Frame lighting strips
+- Wire management accessories
+- Light/turn signal switch
+
+## Tools
+
+- Soldering iron
+- Heat shrink tubing
+- Bottom bracket removal tool
+- Socket set
+- Allen keys
+- Programming cable
 
 ## Conclusion
 
-While the spaces vs. tabs debate might not have a one-size-fits-all answer, it underscores the importance of consistency, readability, and team collaboration in software development. Whether a team chooses spaces, tabs, or a hybrid approach, the key is to make a conscious choice that serves the project's needs and to adhere to it throughout the codebase. As with many aspects of coding, communication and agreement among team members are paramount to navigating this classic programming debate.
+Building this e-bike transformed my commute, making it faster, more enjoyable, and practical for daily use. The Bafang mid-drive system proved to be an excellent choice, and my customizations—like battery placement, lighting upgrades, and 3D-printed parts—added both convenience and safety.
+
+If you’re considering an e-bike conversion, I highly recommend researching your specific needs, choosing reliable components, and making thoughtful modifications to suit your riding style. Happy riding!
+
+Check out this github repository with all the details and a how to.

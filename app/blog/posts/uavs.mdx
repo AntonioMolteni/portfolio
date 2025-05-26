@@ -1,32 +1,127 @@
 ---
 title: "UAVs@Berkeley: Monitoring Battery Cell Voltages"
 publishedAt: "2024-04-07"
-summary: ""
+summary: "Building a PCB for monitoring individual battery cell voltages of 4 lithium ion batteries in a hexacopter."
+image: "/media/uavs/battery_telemetry_render.png"
 project: true
 ---
 
-The debate between using spaces and tabs for indentation in coding may seem trivial to the uninitiated, but it is a topic that continues to inspire passionate discussions among developers. This seemingly minor choice can affect code readability, maintenance, and even team dynamics.
+## Introduction
 
-Let's delve into the arguments for both sides and consider why this debate remains relevant in the software development world.
+As I entered my senior year at the University of California, Berkeley, I discovered UAVs@Berkeley, a club dedicated to drone enthusiasts who not only raced drones but also worked on larger, more advanced drone engineering projects. Excited by the opportunity, I joined the club and became involved in several fascinating projects, including one that focused on designing a PCB to monitor the individual cell voltages within the drone's four battery packs.
 
-## The Case for Spaces
+This project arose from a critical need to enhance the reliability of our drone’s power system. The team had previously suffered a catastrophic power failure, which resulted in the drone plummeting from the sky. Given our goal of competing in the Student Unmanned Aerial Systems (SUAS) Competition, ensuring a stable and dependable powertrain was essential. Thus, I made it my mission to reinforce the drone’s electrical systems and prevent such failures from happening again.
 
-Advocates for using spaces argue that it ensures consistent code appearance across different editors, tools, and platforms. Because a space is a universally recognized character with a consistent width, code indented with spaces will look the same no matter where it's viewed. This consistency is crucial for maintaining readability and avoiding formatting issues when code is shared between team members or published online.
+## Context: Investigating the Crash
 
-Additionally, some programming languages and style guides explicitly recommend spaces for indentation, suggesting a certain number of spaces (often two or four) per indentation level. Adhering to these recommendations can be essential for projects that aim for best practices in code quality and readability.
+The drone’s sudden power loss was a major concern for the team, so we set out to analyze the root cause. The video below captures the unfortunate moment when the motors lost power mid-flight:
 
-## The Case for Tabs
+<video controls width="1200">
+  <source src="/media/uavs/drone_crash.mov" type="video/mp4" />
+  Your browser does not support the video tag.
+</video>
 
-On the other side of the debate, proponents of tabs highlight the flexibility that tabs offer. Because the width of a tab can be adjusted in most text editors, individual developers can choose how much indentation they prefer to see, making the code more accessible and comfortable to read on a personal level. This adaptability can be particularly beneficial in teams with diverse preferences regarding code layout.
+Following the crash, we examined the flight logs for any clues. The recorded data revealed that at exactly 2 minutes and 43 seconds into the flight, the drone suffered a complete power loss, leading to a total system shutdown.
 
-Tabs also have the advantage of semantic meaning. A tab is explicitly meant to represent indentation, whereas a space is used for many purposes within code. This distinction can make automated parsing and manipulation of code simpler, as tools can more easily recognize and adjust indentation levels without confusing them with spaces used for alignment.
+![Crash Data](/media/uavs/crash_data.png)
 
-## Hybrid Approaches and Team Dynamics
+Upon closer inspection of the drone’s hardware, we found that the failure was due to poor connections in the powertrain. The vibrations from flight had caused a critical connection to loosen or momentarily disconnect, cutting power to the entire system.
 
-The debate often extends into discussions about hybrid approaches, where teams might use tabs for indentation and spaces for alignment within lines, attempting to combine the best of both worlds. However, such strategies require clear team agreements and disciplined adherence to coding standards to prevent formatting chaos.
+![Crash Aftermath](/media/uavs/crash_aftermath.png)
 
-Ultimately, the choice between spaces and tabs often comes down to team consensus and project guidelines. In environments where collaboration and code sharing are common, agreeing on a standard that everyone follows is more important than the individual preferences of spaces versus tabs. Modern development tools and linters can help enforce these standards, making the choice less about technical limitations and more about team dynamics and coding philosophy.
+As seen in the image above, the wiring setup was rather chaotic, held together with Velcro and tape. While this approach allowed for quick modifications, it severely compromised reliability—an unacceptable risk for a flying vehicle. Recognizing the need for a robust and well-organized electrical system, we decided to implement a structured power management solution.
 
-## Conclusion
+![Power Train](/media/uavs/power_train.png)
 
-While the spaces vs. tabs debate might not have a one-size-fits-all answer, it underscores the importance of consistency, readability, and team collaboration in software development. Whether a team chooses spaces, tabs, or a hybrid approach, the key is to make a conscious choice that serves the project's needs and to adhere to it throughout the codebase. As with many aspects of coding, communication and agreement among team members are paramount to navigating this classic programming debate.
+To improve the setup, the electrical team devised a plan to construct a dedicated electrical housing unit. This would help minimize stress on connectors, reducing the risk of disconnections. Additionally, we introduced rubber feet to isolate the housing from the drone’s frame, mitigating the impact of vibrations.
+
+## Designing an Electrical Box
+
+Our mechanical engineering team took the lead in designing a protective electrical housing, translating our electrical team’s specifications into a functional CAD model. The design featured secure mounting points for an electrical switch, as well as patch connectors for the batteries and motors.
+
+![Electrical Box Render](/media/uavs/electrical_box_render.png)
+
+The new wiring layout aimed to streamline connections while keeping them secure. Eventually, we planned to route the wires inside the carbon fiber arm tubes to achieve a cleaner and more organized appearance.
+
+![Wiring Diagram](/media/uavs/wiring_diagram.png)
+
+The first 3D-printed prototype of the electrical box was a success. You can see in the image below how the box is suspended from the drone’s frame using rubber feet, providing much-needed vibration isolation. The lid also features a dedicated mount for the kill switch.
+
+![Electrical Box Prints](/media/uavs/electrical_box_prints.png)
+
+After testing, we deemed the design successful, and it became a permanent fixture on our hexacopter.
+
+![360 Ship 2](/media/uavs/360_ship_2.png)
+
+## Monitoring Cell Voltages
+
+Given the high current draw of the drone’s batteries, monitoring individual cell voltages was crucial for detecting imbalances early and mitigating the risk of electrical fires. The inspiration for this solution came from commercially available battery cell measurement devices, which can assess voltage levels for each cell independently.
+
+![Voltage Meter](/media/uavs/voltage_meter.png)
+
+## Schematic Design
+
+I developed a schematic to enable precise voltage monitoring across all battery cells. The core of this design was the voltage sense circuit, which interfaced with the balance connectors of the batteries to obtain accurate voltage readings.
+
+![Schematic](/media/uavs/schematic/schematic.png)
+
+The voltage sense circuits, as shown below, played a vital role in gathering data from each individual cell.
+
+![Voltage Sense Circuits](/media/uavs/schematic/cell_voltage_sense_circuit.png)
+
+Since all the monitoring chips had the same fixed address, a multiplexer was required to allow them to share the same I<sup>2</sup>C communication bus without conflicts.
+
+![I2C](/media/uavs/schematic/I2C.png)
+
+Initially, our plan was to have the board communicate directly with the onboard computer, but the software team preferred a streamlined approach where data was automatically transmitted. This separation between firmware and software simplified the overall system architecture.
+
+## Powering the PCB
+
+To ensure stable operation, the voltage sense circuits and microcontroller needed a reliable power source. I implemented an LDO regulator buck converter, which utilized battery management chips to step down the voltage to a safe 3V operating level.
+
+![External LDO](/media/uavs/schematic/external_ldo.png)
+
+Since the software team also wanted the option to power the board via the onboard computer, I incorporated multiple power input options. A dedicated switch allowed for seamless selection between external LDO power, USB power, or 3V input from the onboard computer.
+
+![Power Switch](/media/uavs/schematic/power_switch.png)
+
+## PCB Layout and Assembly
+
+For ease of assembly and debugging, I designed the PCB as a single-sided board. This made component placement and hand-soldering much more manageable. While the layout had some minor flaws, such as trace width inconsistencies and less-than-optimal ground planes, it ultimately provided a functional design with sufficient test points.
+
+![Layout](/media/uavs/layout.png)
+
+## Bill of Materials
+
+To complete the design, I compiled a bill of materials listing all necessary components for fabrication and assembly.
+
+![Bill of Materials](/media/uavs/bom.png)
+
+## Final Product and Handoff
+
+After carefully soldering all the surface-mount components, I successfully assembled the final version of the PCB.
+![Finished PCB](/media/uavs/finished_pcb.png)
+
+Upon completing the hardware, I graduated and handed the project over to another team member, who continued refining the firmware using MicroPython. This marked the conclusion of my contributions to the UAVs@Berkeley battery monitoring system, leaving behind a reliable solution for future teams to build upon.
+
+[Battery Telemetry Schematic Source](https://github.com/AntonioMolteni/BatteryTelemetrySchematic)
+
+## Flight Readiness Review
+
+<div style={{ position: "relative", width: "100%", paddingTop: "56.25%" }}>
+  <iframe
+    src="https://www.youtube.com/embed/dakZXCir8EU?si=eFQLlUAcfHwVe7xz"
+    title="YouTube video player"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+    }}
+  ></iframe>
+</div>
